@@ -1,4 +1,5 @@
 import http from 'http';
+import cluster from 'cluster';
 
 const generatePayload = (): string => {
   return JSON.stringify(
@@ -6,8 +7,7 @@ const generatePayload = (): string => {
   );
 };
 
-const sendRequest = (): Promise<void> => {
-  return new Promise<void>((resolve, reject) => {
+const sendRequest = (): void => {
     const payload = generatePayload();
 
     console.log(payload);
@@ -27,30 +27,34 @@ const sendRequest = (): Promise<void> => {
     const req = http.request(options, (res) => {
       res.setEncoding('utf8');
       res.on('data', () => {});
-      res.on('end', resolve);
+      res.on('end', () => {});
     });
 
-    req.on('error', reject);
+    req.on('error', error => {
+      console.log(error);
+    });
     req.write(payload);
     req.end();
-  });
 };
 
-const sendConcurrentRequests = async (): Promise<void> => {
-  const requests = [];
+const sendConcurrentRequests = (): void => {
   for (let i = 0; i < 5; i++) {
-    requests.push(sendRequest());
+    sendRequest();
   }
-  await Promise.all(requests);
-}
+};
 
-const main = async (): Promise<void> => {
-  while (true) {
-    console.log('Sending request...');
-    await sendConcurrentRequests();
-
-    await new Promise((resolve) => setTimeout(resolve, 500));
+if (cluster.isMaster) {
+  for (let i = 0; i < 5; i++) {
+    cluster.fork();
   }
-}
 
-main().catch((error) => console.error('Error:', error));
+  cluster.on('exit', (worker, code, signal) => {
+    console.log('Worker' + worker.process.pid);
+
+    cluster.fork();
+  });
+} else {
+  console.log(`Process id ${process.pid}`);
+
+  setInterval(sendConcurrentRequests, 1000);
+}
