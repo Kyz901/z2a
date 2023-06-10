@@ -11,9 +11,9 @@
     "core-js": "^3.8.3",
     "vue": "^3.2.13",
     "axios": "^1.4.0",
+    "crypto-js": "^4.1.1",
     "jsonwebtoken": "^9.0.0",
-    "stream-browserify": "^3.0.0",
-    "util": "^0.12.5"
+    "stream-browserify": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

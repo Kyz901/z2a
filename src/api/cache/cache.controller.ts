@@ -14,6 +14,8 @@ export const getDataFromRedis =
   async (req: TypedRequest<{}, { page: number }, {}> & IUser, res: BasicResponse
 ) => {
   console.log(`Getting data from redis for page: ${req.query.page}...`);
+  console.log(req.user);
+
   const data = await getFromRedis(req.query.page);
 
   res.json({status: 'success', data});

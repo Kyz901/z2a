@@ -22,13 +22,14 @@
 <script>
 
 import axios from "axios";
+const CryptoJS = require("crypto-js");
 
 export default {
   name: 'App',
 
   data() {
     return {
-      jwtToken: generateJWT(),
+      jwtToken: '',
       savedString: [],
       pageNum: 1,
       baseUrl: 'http://localhost:8082/v1'
@@ -36,6 +37,7 @@ export default {
   },
 
   created() {
+    this.jwtToken = this.generateJWT();
     this.getData(this.pageNum, this.jwtToken)
         .then(response => {
           this.savedString = response;
@@ -46,6 +48,20 @@ export default {
   },
 
   methods: {
+    generateJWT() {
+      const header = { "alg": "HS256", "typ": "JWT" };
+      const payload = { "user": "John Doe" };
+      const secretKey = "mcb3DaS05Yvt";
+
+      const encodedHeader = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(JSON.stringify(header)));
+      const encodedPayload = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(JSON.stringify(payload)));
+
+      const token = `${encodedHeader}.${encodedPayload}`;
+      const signature = CryptoJS.HmacSHA256(token, secretKey).toString(CryptoJS.enc.Base64);
+
+      return `${token}.${signature}`;
+    },
+
     decrementPage() {
       if (this.pageNum > 1) {
         this.pageNum--;
@@ -87,15 +103,6 @@ export default {
     }
   },
 }
-
-export const generateJWT = () => {
-  // const header = { "alg": "HS256", "typ": "JWT" };
-  // const payload = { "user": "John Doe" };
-  // const secretKey = "mcb3DaS05Yvt";
-
-  // return jwt.sign(header, payload, secretKey, { algorithm: 'HS256' });
-  return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiSm9obiBEb2UifQ.V5pM3HLRiP7eUEm99Tk54Sk6mTPpxw5YTqmI5IqOZOY';
-};
 
 </script>
 
