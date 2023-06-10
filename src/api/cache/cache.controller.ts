@@ -13,7 +13,7 @@ export const saveDataToRedis =
 export const getDataFromRedis =
   async (req: TypedRequest<{}, { page: number }, {}> & IUser, res: BasicResponse
 ) => {
-  console.log('Getting data from redis for page' + req.query.page + '...');
+  console.log(`Getting data from redis for page: ${req.query.page}...`);
   const data = await getFromRedis(req.query.page);
 
   res.json({status: 'success', data});
